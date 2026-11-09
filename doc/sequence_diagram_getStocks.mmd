@@ -1,0 +1,41 @@
+sequenceDiagram
+
+actor User
+%% フロントエンド %%
+participant Vue
+participant StockController
+participant StockService
+participant JQuantsClient
+%% 外部システム %%
+participant J-QuantsAPI
+
+User ->> Vue : 銘柄一覧を表示
+activate User
+activate Vue
+
+Vue ->> StockController : 銘柄一覧を要求
+activate StockController
+
+StockController ->> StockService : +getStocks()
+activate StockService
+
+StockService ->> JQuantsClient : +fetchStocks()
+activate JQuantsClient
+
+JQuantsClient ->> J-QuantsAPI : HTTP GET
+activate J-QuantsAPI
+J-QuantsAPI -->> JQuantsClient : 銘柄一覧データ
+deactivate J-QuantsAPI
+
+JQuantsClient -->> StockService : List<Stock>
+deactivate JQuantsClient
+
+StockService -->>StockController : List<Stock>
+deactivate StockService
+
+StockController -->> Vue : 銘柄一覧データ
+deactivate StockController
+
+Vue -->> User : 一覧を表示
+deactivate Vue
+deactivate User

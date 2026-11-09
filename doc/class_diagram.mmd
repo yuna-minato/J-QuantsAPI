@@ -1,0 +1,72 @@
+classDiagram
+%% model %%
+namespace model {
+    %% 銘柄 %%
+    class Stock {
+        -String code
+        -String coName
+    }
+
+    %% 株価四本値管理 %%
+    class StockPrice {
+        -LocalDate date
+        -String code
+        -BigDecimal high
+        -BigDecimal low
+        -BigDecimal open
+        -BigDecimal close
+        -BigDecimal volume
+    }
+}
+
+%% application %%
+namespace application {
+    class StockApplication {
+        %% Spring Bootを起動する %%
+        +main(args : String[]) : void
+    }
+}
+
+%% controller %%
+namespace controller {
+    %% SpringBootを呼びつける %%
+    %% StockServiceを呼び出し、返ってきた結果をVueに返す %%
+    class StockController {
+        -StockService stockService
+        %% 銘柄一覧表示画面用 %%
+        +getStocks() : List~Stock~
+        %% 株価四本値取得画面用 %%
+        +getStockPrices(code : String, startDate : LocalDate, endDate : LocalDate) : List~StockPrice~
+    }
+} 
+
+%% service %%
+namespace service {
+    %% アプリ側の処理を担当 %%
+    %% 取得可能期間/開始日<=終了日のチェック・J-Quantsからのデータ取得を依頼する %%
+    class StockService {
+        -JQuantsClient jQuantsClient
+        +getStocks() : List~Stock~
+        +getStockPrices(code : String, startDate : LocalDate, endDate : LocalDate) : List~StockPrice~
+    }
+}
+
+%% client %%
+namespace client {
+    %% J-Quantsとの通信、J-QuantsのAPIを呼び出す %%
+    class JQuantsClient {
+        -String apiKey
+        +fetchStocks() : List~Stock~
+        +fetchStockPrices(code : String, startDate : LocalDate, endDate : LocalDate) : List~StockPrice~
+    }
+}
+
+StockController --> StockService
+StockService --> JQuantsClient
+
+StockController ..> Stock
+StockController ..> StockPrice
+StockService ..> Stock
+StockService ..> StockPrice
+JQuantsClient ..> Stock
+JQuantsClient ..> StockPrice

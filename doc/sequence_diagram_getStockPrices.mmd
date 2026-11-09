@@ -1,0 +1,41 @@
+sequenceDiagram
+
+actor User
+%% フロントエンド %%
+participant Vue
+participant StockController
+participant StockService
+participant JQuantsClient
+%% 外部システム %%
+participant J-QuantsAPI
+
+User ->> Vue : 株価四本値を表示
+activate User
+activate Vue
+
+Vue ->> StockController : 株価四本値を要求
+activate StockController
+
+StockController ->> StockService : +getStockPrices(code : String, startDate : LocalDate, endDate : LocalDate)
+activate StockService
+
+StockService ->> JQuantsClient : +fetchStockPrices(code : String, startDate : LocalDate, endDate : LocalDate)
+activate JQuantsClient
+
+JQuantsClient ->> J-QuantsAPI : HTTP GET
+activate J-QuantsAPI
+J-QuantsAPI -->> JQuantsClient : 株価四本値データ
+deactivate J-QuantsAPI
+
+JQuantsClient -->> StockService : List<StockPrice>
+deactivate JQuantsClient
+
+StockService -->>StockController : List<StockPrice>
+deactivate StockService
+
+StockController -->> Vue : 株価四本値データ
+deactivate StockController
+
+Vue -->> User : グラフ・一覧を表示
+deactivate Vue
+deactivate User
