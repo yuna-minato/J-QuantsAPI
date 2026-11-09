@@ -3,6 +3,7 @@ package com.example.jquants.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ import com.example.jquants.service.StockService;
  * SpringBootが呼びつけるとStockServiceを呼び出し、返ってきた結果をVueに返すクラス
  * @author yuna.minato
  */
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 public class StockController {
     /** アプリ側の処理を担当する  */
