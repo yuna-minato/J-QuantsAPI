@@ -34,11 +34,40 @@ const coName = route.query.coName
 const startDate = ref('')
 const endDate = ref('')
 
-// Spring Bootから取得した四本値
-const stockPrices = ref([])
+// 日付の表示方法変換
+const formatDate = (date) => {
+    return date.replaceAll('-', '/')
+}
+
+// Dateをyyyy-MM-dd形式へ変換
+const toDateString = (date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+
+    return `${year}-${month}-${day}`
+}
+
+// 取得可能な最古日（今日から２年前）
+const minDate = new Date()
+minDate.setFullYear(minDate.getFullYear() - 2)
+
+const minDateString = toDateString(minDate)
+
+// 取得可能な最新日（今日から１２週間前）
+const maxDate = new Date()
+maxDate.setDate(maxDate.getDate() - 12 * 7)
+
+const maxDateString = toDateString(maxDate)
 
 // エラーメッセージ
 const errorMessage = ref('')
+
+// エラーメッセージ表示用の日付
+const availablePeriodText = `${formatDate(minDateString)} ～ ${formatDate(maxDateString)}`
+
+// Spring Bootから取得した四本値
+const stockPrices = ref([])
 
 // データをグラフ用に変換
 const chartData = computed(() => ({
@@ -145,10 +174,33 @@ const fetchStockPrices = async () => {
     try {
         errorMessage.value = ''
 
+        // 未入力チェック
         if (!startDate.value || !endDate.value) {
-            errorMessage.value = '取得期間内の日付を指定してください'
+            errorMessage.value = '取得可能期間内の日付を指定してください' +
+                                    '\n' +
+                                    '取得可能期間：' + availablePeriodText
             return
         }
+
+        // 開始日と終了日の前後チェック
+        if (startDate.value > endDate.value) {
+            errorMessage.value = '開始日は終了日以前の日付を指定してください'
+            return
+        }
+
+        // 取得可能期間外チェック
+        const isOutsideAvailablePeriod =
+            startDate.value < minDateString ||
+            startDate.value > maxDateString ||
+            endDate.value < minDateString ||
+            endDate.value > maxDateString
+
+            if (isOutsideAvailablePeriod) {
+                errorMessage.value = '取得可能期間内の日付を指定してください' +
+                                    '\n' +
+                                    '取得可能期間：' + availablePeriodText
+                return
+            }
 
         const url = 
             'http://localhost:8080/api/stockPrices' +
@@ -173,11 +225,6 @@ const fetchStockPrices = async () => {
     }
 }
 
-// 日付の表示方法変換
-const formatDate = (date) => {
-    return date.replaceAll('-', '/')
-}
-
 </script>
 
 <template>
@@ -189,6 +236,10 @@ const formatDate = (date) => {
         
         <div class="period">
             <div class="period-title">期間</div>
+
+            <p class="available-period">
+                取得可能期間：{{ availablePeriodText }}
+            </p>
 
             <div class="period-input">
             <input
@@ -214,7 +265,10 @@ const formatDate = (date) => {
             </div>
         </div>
 
-        <p v-if="errorMessage">
+        <p 
+            v-if="errorMessage"
+            class="error-message"
+        >
             {{ errorMessage }}
         </p>
 
@@ -375,5 +429,19 @@ const formatDate = (date) => {
     .date-separator {
         font-size: 18px;
         margin: 0 8px;
+    }
+
+    .error-message {
+        white-space: pre-line;
+        color: #d32f2f;
+        font-size: 16px;
+        font-weight: bold;
+        margin: 15px 0;
+    }
+    
+    .available-period {
+        margin: 0 0 10px;
+        color: #555555;
+        font-size: 15px;
     }
 </style>

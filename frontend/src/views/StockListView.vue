@@ -4,15 +4,25 @@ import { RouterLink } from 'vue-router'
 
 const stocks = ref([])
 
+// エラーメッセージ
+const errorMessage = ref('')
+
 // 銘柄一覧を取得
 const fetchStocks = async () => {
   try {
     const response = await fetch('http://localhost:8080/api/stocks')
+
+    if (!response.ok) {
+        throw new Error('銘柄一覧の取得に失敗しました')
+    }
+
     const data = await response.json()
 
     stocks.value = data
   } catch (error) {
     console.error('銘柄取得エラー:', error)
+
+    errorMessage.value = '銘柄一覧の取得中にエラーが発生しました'
   }
 }
 
@@ -128,9 +138,16 @@ onMounted(() => {
                 </button>
             </div>
 
-        <p class="stock-count">
-            取得件数：{{ filteredStocks.length }}件
-        </p>
+            <p
+                v-if="errorMessage"
+                class="error-message"
+            >
+                {{ errorMessage }}
+            </p>
+
+            <p class="stock-count">
+                取得件数：{{ filteredStocks.length }}件
+            </p>
 
         <table class="stock-table">
         <thead>
@@ -356,5 +373,12 @@ onMounted(() => {
         color: #2f9ca5;
         border-radius: 6px;
         cursor: pointer;
+    }
+
+    .error-message {
+        color: #d32f2f;
+        font-size: 16px;
+        font-weight: bold;
+        margin: 15px 0;
     }
  </style>
