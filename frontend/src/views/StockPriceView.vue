@@ -81,6 +81,11 @@ const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
 
+    interaction: {
+        mode: 'index',
+        intersect: false
+    },
+
     plugins: {
         title: {
             display: true,
@@ -93,6 +98,40 @@ const chartOptions = {
         legend: {
             display: true,
             labels: {
+                font: {
+                    size: 16
+                }
+            }
+        },
+
+        tooltip: {
+            enabled: true,
+            callbacks: {
+                label: (context) => {
+                    return context.dataset.label
+                        + ':'
+                        + context.parsed.y.toLocaleString()
+                        + '円'
+                }
+            }
+        }
+    },
+
+    scales: {
+        y: {
+            title: {
+                display: true,
+                text: '株価（円）',
+                font: {
+                    size: 16
+                }
+            }
+        },
+
+        x: {
+            title: {
+                display: true,
+                text: '日付',
                 font: {
                     size: 16
                 }
@@ -158,7 +197,7 @@ const formatDate = (date) => {
                 type="date"
             />
 
-            <span class="date-separator"> ~ </span>
+            <span class="date-separator"> ～ </span>
 
             <input
                 class="date-input"
@@ -196,11 +235,11 @@ const formatDate = (date) => {
             <thead>
                 <tr>
                     <th>日付</th>
-                    <th>始値</th>
-                    <th>高値</th>
-                    <th>安値</th>
-                    <th>終値</th>
-                    <th>出来高</th>
+                    <th>始値（円）</th>
+                    <th>高値（円）</th>
+                    <th>安値（円）</th>
+                    <th>終値（円）</th>
+                    <th>出来高（株）</th>
                 </tr>
             </thead>
 
@@ -237,12 +276,12 @@ const formatDate = (date) => {
     .price-table th,
     .price-table td {
         border: 1px solid #cccccc;
-        padding: 8px-12px;
+        padding: 8px 12px;
     }
 
     .price-table th {
         background-color: #e3f9fdf3;
-        front-weight: bold;
+        font-weight: bold;
         text-align: center;
     }
 
@@ -267,7 +306,7 @@ const formatDate = (date) => {
         color: white;
         text-decoration: none;
         border-radius: 6px;
-        front-weight: bold;
+        font-weight: bold;
     }
 
     .back-button:hover {
