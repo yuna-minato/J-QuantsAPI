@@ -110,6 +110,7 @@ onMounted(() => {
                     v-model="searchText"
                     type="text"
                     class="search-input"
+                    @keyup.enter="searchStocks"
                 />
 
                 <button 
@@ -128,7 +129,7 @@ onMounted(() => {
             </div>
 
         <p class="stock-count">
-            取得件数：{{ stocks.length }}件
+            取得件数：{{ filteredStocks.length }}件
         </p>
 
         <table class="stock-table">
